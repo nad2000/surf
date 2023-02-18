@@ -1,0 +1,12 @@
+*.orig
+*.rej
+*.o
+*.so
+dwm
+dwm.pdf
+.session.vim
+tags
+nohup.out
+surf
+_*
+~*

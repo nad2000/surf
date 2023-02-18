@@ -6,6 +6,7 @@ static char *styledir       = "~/.surf/styles/";
 static char *certdir        = "~/.surf/certificates/";
 static char *cachedir       = "~/.surf/cache/";
 static char *cookiefile     = "~/.surf/cookies.txt";
+static char *historyfile    = "~/.surf/history.txt";
 
 /* Webkit default features */
 /* Highest priority value will be used.
@@ -39,7 +40,8 @@ static Parameter defconfig[ParameterLast] = {
 	[PreferredLanguages]  =       { { .v = (char *[]){ NULL } }, },
 	[RunInFullscreen]     =       { { .i = 0 },     },
 	[ScrollBars]          =       { { .i = 1 },     },
-	[ShowIndicators]      =       { { .i = 1 },     },
+	// [ShowIndicators]      =       { { .i = 1 },     },
+	[ShowIndicators]      =       { { .i = 0 },     },
 	[SiteQuirks]          =       { { .i = 1 },     },
 	[SmoothScrolling]     =       { { .i = 0 },     },
 	[SpellChecking]       =       { { .i = 0 },     },
@@ -61,6 +63,15 @@ static int winsize[] = { 800, 600 };
 
 static WebKitFindOptions findopts = WEBKIT_FIND_OPTIONS_CASE_INSENSITIVE |
                                     WEBKIT_FIND_OPTIONS_WRAP_AROUND;
+
+#define SETURI(p) { \
+	.v = (char *[]){ "/bin/sh", "-c", \
+		"prop=\"$(tac ~/.surf/history | dmenu -l 10 -b -i | cut -d ' ' -f 3)\" &&" \
+		"xprop -id $1 -f $0 8s -set $0 \"$prop\"", \
+		p, winid, NULL \
+	} \
+}
+
 
 #define PROMPT_GO   "Go:"
 #define PROMPT_FIND "Find:"
@@ -145,7 +156,8 @@ static SiteSpecific certs[] = {
 static Key keys[] = {
 	/* modifier              keyval          function    arg */
 	{ MODKEY,                GDK_KEY_g,      spawn,      SETPROP("_SURF_URI", "_SURF_GO", PROMPT_GO) },
-	{ MODKEY,                GDK_KEY_f,      spawn,      SETPROP("_SURF_FIND", "_SURF_FIND", PROMPT_FIND) },
+	// { MODKEY,                GDK_KEY_f,      spawn,      SETPROP("_SURF_FIND", "_SURF_FIND", PROMPT_FIND) },
+	{ MODKEY,                GDK_KEY_s,      spawn,      SETPROP("_SURF_FIND", "_SURF_FIND", PROMPT_FIND) },
 	{ MODKEY,                GDK_KEY_slash,  spawn,      SETPROP("_SURF_FIND", "_SURF_FIND", PROMPT_FIND) },
 	{ MODKEY,                GDK_KEY_m,      spawn,      BM_ADD("_SURF_URI") },
 
@@ -161,17 +173,21 @@ static Key keys[] = {
 	/* vertical and horizontal scrolling, in viewport percentage */
 	{ MODKEY,                GDK_KEY_j,      scrollv,    { .i = +10 } },
 	{ MODKEY,                GDK_KEY_k,      scrollv,    { .i = -10 } },
-	{ MODKEY,                GDK_KEY_space,  scrollv,    { .i = +50 } },
+	// { MODKEY,                GDK_KEY_space,  scrollv,    { .i = +50 } },
+	{ MODKEY,                GDK_KEY_d,      scrollv,    { .i = +50 } },
 	{ MODKEY,                GDK_KEY_b,      scrollv,    { .i = -50 } },
 	{ MODKEY,                GDK_KEY_i,      scrollh,    { .i = +10 } },
 	{ MODKEY,                GDK_KEY_u,      scrollh,    { .i = -10 } },
 
 
-	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_j,      zoom,       { .i = -1 } },
-	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_k,      zoom,       { .i = +1 } },
-	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_q,      zoom,       { .i = 0  } },
-	{ MODKEY,                GDK_KEY_minus,  zoom,       { .i = -1 } },
-	{ MODKEY,                GDK_KEY_plus,   zoom,       { .i = +1 } },
+	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_j,         zoom,       { .i = -1 } },
+	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_Page_Down, zoom,       { .i = -1 } },
+	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_k,         zoom,       { .i = +1 } },
+	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_Page_Up,   zoom,       { .i = +1 } },
+	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_q,         zoom,       { .i = 0  } },
+	{ MODKEY|GDK_SHIFT_MASK, GDK_KEY_Home,      zoom,       { .i = 0  } },
+	{ MODKEY,                GDK_KEY_minus,     zoom,       { .i = -1 } },
+	{ MODKEY,                GDK_KEY_plus,      zoom,       { .i = +1 } },
 
 	{ MODKEY,                GDK_KEY_p,      clipboard,  { .i = 1 } },
 	{ MODKEY,                GDK_KEY_y,      clipboard,  { .i = 0 } },
